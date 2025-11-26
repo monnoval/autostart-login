@@ -1,0 +1,12 @@
+[Unit]
+Description=Xremap - Keyboard and Mouse Remapper
+
+[Service]
+ExecStart=%XREMAP_BIN% %XREMAP_CONFIG% --device=%XREMAP_DEVICES%
+Restart=always
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+

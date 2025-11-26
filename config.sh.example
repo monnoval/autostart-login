@@ -11,3 +11,18 @@ LOG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # When to run after login (delay to avoid system load at startup)
 LOGIN_DELAY="4min"
 
+# ========================================
+# Xremap Configuration
+# ========================================
+
+# Path to xremap binary
+XREMAP_BIN="%h/.cargo/bin/xremap"
+
+# Path to xremap config file
+XREMAP_CONFIG="%h/.config/xremap/config.yml"
+
+# Devices to monitor (comma-separated, use \s for spaces in device names)
+# Example: XREMAP_DEVICES="Kinesis,ELECOM,HID\s05f3"
+# Leave blank to monitor all devices, or run 'xinput list --name-only' to find device names
+XREMAP_DEVICES=""
+
