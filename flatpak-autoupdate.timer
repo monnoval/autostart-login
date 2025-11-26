@@ -1,0 +1,12 @@
+[Unit]
+Description=Flatpak Auto-Update Timer (Runs on Login)
+After=graphical-session.target
+
+[Timer]
+# Run after login with configured delay
+OnStartupSec=%LOGIN_DELAY%
+Persistent=false
+
+[Install]
+WantedBy=timers.target
+

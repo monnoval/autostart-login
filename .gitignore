@@ -1,0 +1,17 @@
+# Local configuration (users should copy from config.sh.example)
+config.sh
+
+# Runtime/generated files
+*.log
+last-update
+logs/
+
+# Vim/editor files
+tags
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+

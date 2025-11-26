@@ -1,0 +1,13 @@
+[Unit]
+Description=Flatpak Auto-Update (Once Daily)
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%SCRIPT_DIR%/flatpak-update-daily.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+

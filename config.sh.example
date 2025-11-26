@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Flatpak Auto-Update Configuration
+# Copy this file to config.sh and edit to customize for your setup
+#
+
+# Log directory for flatpak updates (relative to project directory)
+# Logs will be stored in the same directory as this script
+LOG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# When to run after login (delay to avoid system load at startup)
+LOGIN_DELAY="4min"
+
