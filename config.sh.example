@@ -21,8 +21,9 @@ XREMAP_BIN="%h/.cargo/bin/xremap"
 # Path to xremap config file
 XREMAP_CONFIG="%h/.config/xremap/config.yml"
 
-# Devices to monitor (comma-separated, use \s for spaces in device names)
-# Example: XREMAP_DEVICES="Kinesis,ELECOM,HID\s05f3"
+# Devices to monitor (comma-separated, use \\s for spaces in device names)
+# Example: XREMAP_DEVICES="Kinesis,ELECOM,HID\\s05f3"
 # Leave blank to monitor all devices, or run 'xinput list --name-only' to find device names
+# Note: Use double backslash (e.g., \\s) in this file - bash will convert to single backslash
 XREMAP_DEVICES=""
 

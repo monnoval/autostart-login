@@ -98,9 +98,11 @@ if [ "$INSTALL_XREMAP" = true ]; then
     
     # Generate service file with configured paths
     echo "Generating xremap service file..."
+    # Escape backslashes for sed (so \s becomes \\s in the output)
+    XREMAP_DEVICES_ESCAPED="${XREMAP_DEVICES//\\/\\\\}"
     sed -e "s|%XREMAP_BIN%|$XREMAP_BIN|g" \
         -e "s|%XREMAP_CONFIG%|$XREMAP_CONFIG|g" \
-        -e "s|%XREMAP_DEVICES%|$XREMAP_DEVICES|g" \
+        -e "s|%XREMAP_DEVICES%|$XREMAP_DEVICES_ESCAPED|g" \
         "$SCRIPT_DIR/xremap.service" > "$SYSTEMD_USER_DIR/xremap.service"
     
     echo "✓ Xremap service file generated"
