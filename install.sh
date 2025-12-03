@@ -36,11 +36,10 @@ if [ -f "$SCRIPT_DIR/config.sh" ]; then
     echo "✓ Loaded configuration from config.sh"
 else
     echo "⚠️  No config.sh found, using defaults"
-    LOG_DIR="$SCRIPT_DIR"
     LOGIN_DELAY="4min"
     XREMAP_BIN="%h/.cargo/bin/xremap"
     XREMAP_CONFIG="%h/.config/xremap/config.yml"
-    XREMAP_DEVICES="Kinesis,ELECOM,HID\s05f3"
+    XREMAP_DEVICES=""
 fi
 
 # Systemd user directory (respects XDG_CONFIG_HOME)
@@ -58,8 +57,8 @@ mkdir -p "$SYSTEMD_USER_DIR"
 # ========================================
 if [ "$INSTALL_FLATPAK" = true ]; then
     echo "━━━ Flatpak Auto-Update ━━━"
-    echo "  Log directory: $LOG_DIR"
     echo "  Login delay: $LOGIN_DELAY"
+    echo "  State dir: ~/.local/share/flatpak-autoupdate/"
     echo ""
     
     # Remove old service files if they exist
@@ -89,7 +88,7 @@ if [ "$INSTALL_XREMAP" = true ]; then
     echo "━━━ Xremap Keyboard/Mouse Remapper ━━━"
     echo "  Binary: $XREMAP_BIN"
     echo "  Config: $XREMAP_CONFIG"
-    echo "  Devices: $XREMAP_DEVICES"
+    echo "  Devices: ${XREMAP_DEVICES:-"(all devices)"}"
     echo ""
     
     # Remove old service file if it exists
@@ -98,11 +97,17 @@ if [ "$INSTALL_XREMAP" = true ]; then
     
     # Generate service file with configured paths
     echo "Generating xremap service file..."
-    # Escape backslashes for sed (so \s becomes \\s in the output)
-    XREMAP_DEVICES_ESCAPED="${XREMAP_DEVICES//\\/\\\\}"
+    # Build device flag only if XREMAP_DEVICES is set
+    if [ -n "$XREMAP_DEVICES" ]; then
+        # Escape backslashes for sed (so \s becomes \\s in the output)
+        XREMAP_DEVICES_ESCAPED="${XREMAP_DEVICES//\\/\\\\}"
+        XREMAP_DEVICE_FLAG="--device=$XREMAP_DEVICES_ESCAPED"
+    else
+        XREMAP_DEVICE_FLAG=""
+    fi
     sed -e "s|%XREMAP_BIN%|$XREMAP_BIN|g" \
         -e "s|%XREMAP_CONFIG%|$XREMAP_CONFIG|g" \
-        -e "s|%XREMAP_DEVICES%|$XREMAP_DEVICES_ESCAPED|g" \
+        -e "s|%XREMAP_DEVICE_FLAG%|$XREMAP_DEVICE_FLAG|g" \
         "$SCRIPT_DIR/xremap.service" > "$SYSTEMD_USER_DIR/xremap.service"
     
     echo "✓ Xremap service file generated"
@@ -159,7 +164,7 @@ if [ "$INSTALL_FLATPAK" = true ]; then
     echo "  • Runs automatically $LOGIN_DELAY after login"
     echo "  • Updates flatpak packages only once per day"
     echo "  • Desktop notifications on completion/failure"
-    echo "  • Logs stored in: $LOG_DIR"
+    echo "  • View logs: journalctl --user -u flatpak-autoupdate.service"
     echo ""
 fi
 
@@ -167,11 +172,10 @@ if [ "$INSTALL_XREMAP" = true ]; then
     echo "Xremap service:"
     echo "  • Running continuously in background"
     echo "  • Remaps keyboard and mouse buttons"
-    echo "  • Monitoring devices: $XREMAP_DEVICES"
+    echo "  • Monitoring devices: ${XREMAP_DEVICES:-"(all devices)"}"
     echo ""
 fi
 
 echo "Configuration: $SCRIPT_DIR/config.sh"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-

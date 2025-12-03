@@ -11,7 +11,7 @@ Automatically update Flatpak packages once per day after login.
 - **Once-per-day updates**: Checks timestamp to ensure flatpak only updates once daily
 - **Login-triggered**: Runs automatically after you log in (with configurable delay)
 - **Desktop notifications**: Get notified when updates complete or fail
-- **Automatic logging**: All updates logged for your records
+- **Multi-machine safe**: State stored locally per machine, not in project directory
 - **Non-intrusive**: Configurable delay after login to avoid system load at startup
 
 ### 2. Xremap
@@ -37,7 +37,6 @@ Keyboard and mouse button remapper running as a persistent service.
    ```
    
    **Flatpak Auto-Update settings:**
-   - `LOG_DIR`: Where to store update logs and timestamp file (defaults to project directory)
    - `LOGIN_DELAY`: How long to wait after login before attempting update
    
    **Xremap settings:**
@@ -78,11 +77,14 @@ systemctl --user status flatpak-autoupdate.timer
 # Check when next update is scheduled
 systemctl --user list-timers flatpak-autoupdate.timer
 
-# View update logs (in the project directory)
-cat update.log
+# View logs
+journalctl --user -u flatpak-autoupdate.service
+
+# View recent logs
+journalctl --user -u flatpak-autoupdate.service -n 50
 
 # Check when last update ran
-cat last-update
+cat ~/.local/share/flatpak-autoupdate/last-update
 
 # Manually run update (will respect once-per-day limit)
 ./flatpak-update-daily.sh
@@ -120,12 +122,12 @@ xremap ~/.config/xremap/config.yml --device=YourDevice
 
 ## How It Works
 
-1. When you log in, `flatpak-autoupdate.timer` triggers after the configured delay (default: 1 minute)
+1. When you log in, `flatpak-autoupdate.timer` triggers after the configured delay
 2. The timer activates `flatpak-autoupdate.service`, which runs `flatpak-update-daily.sh`
-3. The script checks if flatpak has already been updated today (by reading timestamp file)
+3. The script checks if flatpak has already been updated today (timestamp at `~/.local/share/flatpak-autoupdate/last-update`)
 4. If not updated today, it runs `flatpak update -y` and saves today's date
 5. You get a desktop notification when the update completes or fails
-6. All activity is logged to `update.log` in the project directory
+6. All output is logged to systemd journal (view with `journalctl`)
 
 ## Configuration Files
 
@@ -155,7 +157,7 @@ journalctl --user -u flatpak-autoupdate.service
 ### Already updated today message?
 The script prevents multiple updates per day. To force an update:
 ```bash
-rm last-update
+rm ~/.local/share/flatpak-autoupdate/last-update
 ./flatpak-update-daily.sh
 ```
 
@@ -171,7 +173,7 @@ sudo dnf install kde-cli-tools
 
 ### View detailed logs
 ```bash
-cat update.log
+journalctl --user -u flatpak-autoupdate.service --since today
 ```
 
 ## Customization
@@ -187,12 +189,6 @@ Then reinstall:
 ./install.sh
 ```
 
-### Change log location
-Edit `config.sh` and change `LOG_DIR` to a different path:
-```bash
-LOG_DIR="/path/to/custom/logs"
-```
-
 ## Uninstallation
 
 ### Remove Flatpak Auto-Update
@@ -202,8 +198,8 @@ systemctl --user disable flatpak-autoupdate.timer
 rm ~/.config/systemd/user/flatpak-autoupdate.{service,timer}
 systemctl --user daemon-reload
 
-# Optionally remove logs
-rm update.log last-update
+# Optionally remove state directory
+rm -rf ~/.local/share/flatpak-autoupdate
 ```
 
 ### Remove Xremap
@@ -218,8 +214,8 @@ systemctl --user daemon-reload
 
 - **User services**: Runs as your user, no need for sudo/system modifications
 - **Systemd integration**: Reliable, standard Linux service management
-- **Configurable**: Easy to customize paths and settings
-- **Portable**: Easy to move between systems
+- **Configurable**: Easy to customize settings per machine
+- **Portable**: Project can be synced across machines (state stored locally)
 - **Template-based**: Uses sed to generate service files from templates
 
 ## Notes
@@ -228,11 +224,11 @@ systemctl --user daemon-reload
 - Flatpak updates require no password (user-level flatpaks)
 - If you have system-level flatpaks, they won't be updated (require root)
 - The update runs in the background; you can continue working immediately after login
+- State is stored at `~/.local/share/flatpak-autoupdate/` (machine-local, not in project)
 - Lingering is not required since this triggers on login (not a persistent service)
 
 ### Xremap
 - Requires xremap to be installed (`cargo install xremap --features x11`)
-- Configure devices in `config.sh` - use `\s` for spaces in device names
-- Xremap config uses YAML format - see example for syntax
+- Configure devices in `config.sh` - use `\\s` for spaces in device names
+- Xremap config uses YAML format
 - The service automatically restarts on failure
-

@@ -1,12 +1,12 @@
 #!/bin/bash
 #
-# Flatpak Auto-Update Configuration
+# User Services Configuration
 # Copy this file to config.sh and edit to customize for your setup
 #
 
-# Log directory for flatpak updates (relative to project directory)
-# Logs will be stored in the same directory as this script
-LOG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ========================================
+# Flatpak Auto-Update Configuration
+# ========================================
 
 # When to run after login (delay to avoid system load at startup)
 LOGIN_DELAY="4min"
@@ -26,4 +26,3 @@ XREMAP_CONFIG="%h/.config/xremap/config.yml"
 # Leave blank to monitor all devices, or run 'xinput list --name-only' to find device names
 # Note: Use double backslash (e.g., \\s) in this file - bash will convert to single backslash
 XREMAP_DEVICES=""
-
